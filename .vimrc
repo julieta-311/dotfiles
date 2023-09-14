@@ -168,8 +168,8 @@ let g:go_metalinter_command = 'golangci-lint'
 let g:go_metalinter_autosave = 1
 let g:go_metalinter_autosave_enabled = ['bodyclose', 'dogsled', 'errcheck', 'gofumpt', 'gosimple', 'govet', 'ineffassign', 'staticcheck', 'typecheck', 'unused']
 
-" don't jump to errors after metalinter is invoked
-let g:go_jump_to_error = 0
+" jump to errors after metalinter is invoked
+let g:go_jump_to_error = 1
 
 " automatically highlight variable your cursor is on
 let g:go_auto_sameids = 0
