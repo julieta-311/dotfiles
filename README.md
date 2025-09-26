@@ -3,7 +3,7 @@ My .vimrc
 
 1) Pimp up your terminal with https://github.com/ohmybash/oh-my-bash/.
 2) Download nerd-fonts and set `OS_THEME="agnoster"` in `.bashrc`.
-3) Install vim (pacman), vim-plug (`yay vim-plug`), vim-go (`yay vim-go`), tmux (pacman), nerd-tree (`yay nerdtree`).
+3) Install NeoVim (pacman), vim-go (`yay vim-go`), tmux (pacman), nerd-tree (`yay nerdtree`).
 4) Start tmux on default when opening the terminal by setting the following in `.bashrc`:
 
 ```
@@ -12,6 +12,4 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
 fi
 ```
 
-5) clone this repo and move `this/repo/.vimrc` to `~/.vimrc`.
-6) move `this/repo/.tmux.conf` to  `~/.tmux.conf`.
-
+5) clone this repo and move `this/repo/.vimrc` to `~/.config`.
