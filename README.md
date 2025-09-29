@@ -12,4 +12,4 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
 fi
 ```
 
-5) clone this repo and move `this/repo/.vimrc` to `~/.config`.
+5) clone this repo and move `this/repo/*` to `~/.config`.
