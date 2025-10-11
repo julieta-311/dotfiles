@@ -1,5 +1,5 @@
 -- Set leader key.
-vim.g.mapleader = ","
+vim.g.mapleader = " "
 
 -- Basic editor settings.
 vim.opt.number = true -- Show line numbers.
@@ -17,21 +17,30 @@ vim.opt.tags:append("./tags;")
 
 -- Spelling.
 vim.opt.spell = true
--- Custom spell highlighting. 
+-- Custom spell highlighting.
 vim.api.nvim_set_hl(0, "SpellBad", { undercurl = true, sp = "red" })
 vim.api.nvim_set_hl(0, "SpellCap", { undercurl = true, sp = "yellow" })
 vim.api.nvim_set_hl(0, "SpellRare", { undercurl = true, sp = "blue" })
 vim.api.nvim_set_hl(0, "SpellLocal", { undercurl = true, sp = "orange" })
 
 -- Enable filetype detection, plugins, and indentation.
-vim.cmd "filetype plugin indent on"
-vim.cmd "syntax on"
+vim.cmd("filetype plugin indent on")
+vim.cmd("syntax on")
 
 -- Custom command for :W to write file.
 vim.api.nvim_create_user_command("W", "write", {})
 
 -- Autocmd for Go files.
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "go",
-  command = "setlocal tabstop=4 shiftwidth=4 softtabstop=4",
+	pattern = "go",
+	command = "setlocal tabstop=4 shiftwidth=4 softtabstop=4",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "json", "yaml", "yml", "lua", "html", "css", "sql" }, 
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.tabstop = 2
+		vim.opt_local.expandtab = true
+	end,
 })
