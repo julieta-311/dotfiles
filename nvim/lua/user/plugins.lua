@@ -1,13 +1,58 @@
 return {
 	{
 		"nvim-telescope/telescope.nvim",
-		requires = { "nvim-lua/plenary.nvim" },
-    keys = {
-      { "<leader>tf", "<cmd>Telescope find_files<cr>", desc = "Find files" },
-      { "<leader>tg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
-      { "<leader>tb", "<cmd>Telescope buffers<cr>", desc = "Find buffers" },
-      { "<leader>th", "<cmd>Telescope help_tags<cr>", desc = "Find help tags" },
-    },
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+		},
+		keys = {
+			{
+				"<leader>f",
+				function()
+					require("telescope.builtin").find_files()
+				end,
+				desc = "Find files",
+			},
+			{
+				"<leader>gg",
+				function()
+					require("telescope.builtin").live_grep()
+				end,
+				desc = "Live grep",
+			},
+			{
+				"<leader>tt",
+				function()
+					require("telescope.builtin").buffers()
+				end,
+				desc = "Find buffers",
+			},
+			{
+				"<leader>bt",
+				function()
+					require("telescope.builtin").help_tags()
+				end,
+				desc = "Find help tags",
+			},
+			{
+				"<leader>fc",
+				function()
+					require("telescope.builtin").find_files({
+						cwd = "/Users/julieta/ravelin/core",
+					})
+				end,
+				desc = "Find files in core",
+			},
+			{
+				"<leader>fn",
+				function()
+					require("telescope.builtin").find_files({
+						cwd = vim.fn.stdpath("config"),
+					})
+				end,
+				desc = "Find files in neovim config",
+			},
+		},
 	},
 
 	{
@@ -17,29 +62,25 @@ return {
 			vim.g.loaded_netrw = 1
 			vim.g.loaded_netrwPlugin = 1
 
-						require("nvim-tree").setup({
+			require("nvim-tree").setup({
 
-							sort_by = "case_sensitive",
+				sort_by = "case_sensitive",
 
-							view = {
+				view = {
 
-								width = 30,
+					width = 30,
+				},
 
-							},
+				renderer = {
 
-							renderer = {
+					group_empty = true,
+				},
 
-								group_empty = true,
+				filters = {
 
-							},
-
-							filters = {
-
-								dotfiles = true,
-
-							},
-
-						})
+					dotfiles = true,
+				},
+			})
 
 			-- Auto-open nvim-tree when Neovim starts with no files listed
 			vim.api.nvim_create_autocmd("VimEnter", {
@@ -113,14 +154,12 @@ return {
 		},
 		config = function()
 			vim.diagnostic.config({
-        virtual_text = true,
-        signs =true,
-        underline = true,
-        update_in_insert = true,
-        severity_sort = true,
-      })
-
-      local lspconfig = require("lspconfig")
+				virtual_text = true,
+				signs = true,
+				underline = true,
+				update_in_insert = true,
+				severity_sort = true,
+			})
 
 			-- Setup completion.
 			local cmp = require("cmp")
@@ -163,24 +202,24 @@ return {
 				end,
 			})
 
-			lspconfig.gopls.setup({})
-			lspconfig.lua_ls.setup({
+			vim.lsp.enable("gopls")
+			vim.lsp.enable("pyright")
+			vim.lsp.enable("ts_ls")
+
+			vim.lsp.config("lua_ls", {
 				settings = {
 					Lua = {
-						-- Make the server aware of Neovim runtime files
 						workspace = {
 							checkThirdParty = false,
 							library = vim.api.nvim_get_runtime_file("", true),
 						},
-						-- Do not send telemetry data containing a randomized client identifier.
 						telemetry = {
 							enable = false,
 						},
 					},
 				},
 			})
-			lspconfig.pyright.setup({})
-			lspconfig.tsserver.setup({})
+			vim.lsp.enable("lua_ls")
 		end,
 	},
 
@@ -207,9 +246,27 @@ return {
 		"akinsho/bufferline.nvim",
 		version = "*",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
+		lazy = false,
+		keys = {
+			{ "<leader>bb", "<Cmd>BufferLinePick<CR>", desc = "Pick a buffer" },
+			{ "<leader>bp", "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" },
+			{ "<leader>bn", "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" },
+			{ "<leader>bc", "<Cmd>bdelete<CR>", desc = "Close buffer" },
+		},
 		config = function()
 			require("bufferline").setup({
 				options = {
+					mode = "buffers",
+					diagnostics = "nvim_lsp",
+					offsets = {
+						{
+							filetype = "NvimTree",
+							text = "File Explorer",
+							highlight = "Directory",
+							text_align = "left",
+							separator = true,
+						},
+					},
 					separator_style = "thin",
 					-- Use `show_buffer_close_icons` and `show_close_icon` to configure close icons
 					show_buffer_close_icons = true,
@@ -226,17 +283,52 @@ return {
 
 	{
 		"ThePrimeagen/harpoon",
-		dependencies = { "nvim-lua/plenary.nvim" },
+		branch = "harpoon2",
+		dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope.nvim" },
 		config = function()
-			local mark = require("harpoon.mark")
-			local ui = require("harpoon.ui")
+			require("harpoon"):setup()
 
-			vim.keymap.set("n", "<leader>ha", mark.add_file, { desc = "Harpoon: Add file" })
-			vim.keymap.set("n", "<leader>hh", ui.toggle_quick_menu, { desc = "Harpoon: Toggle menu" })
-			vim.keymap.set("n", "<leader>h1", function() ui.nav_file(1) end, { desc = "Harpoon: Navigate to file 1" })
-			vim.keymap.set("n", "<leader>h2", function() ui.nav_file(2) end, { desc = "Harpoon: Navigate to file 2" })
-			vim.keymap.set("n", "<leader>h3", function() ui.nav_file(3) end, { desc = "Harpoon: Navigate to file 3" })
-			vim.keymap.set("n", "<leader>h4", function() ui.nav_file(4) end, { desc = "Harpoon: Navigate to file 4" })
+			vim.keymap.set("n", "<leader>ha", function()
+				require("harpoon"):list():add()
+			end)
+			vim.keymap.set("n", "<leader>hh", function()
+				require("harpoon").ui:toggle_quick_menu(require("harpoon"):list())
+			end)
+
+			vim.keymap.set("n", "<leader>h1", function()
+				require("harpoon"):list():select(1)
+			end)
+			vim.keymap.set("n", "<leader>h2", function()
+				require("harpoon"):list():select(2)
+			end)
+			vim.keymap.set("n", "<leader>h3", function()
+				require("harpoon"):list():select(3)
+			end)
+			vim.keymap.set("n", "<leader>h4", function()
+				require("harpoon"):list():select(4)
+			end)
+
+			-- Toggle previous & next buffers stored within Harpoon list
+			vim.keymap.set("n", "<C-S-P>", function()
+				require("harpoon"):list():prev()
+			end)
+			vim.keymap.set("n", "<C-S-N>", function()
+				require("harpoon"):list():next()
+			end)
+
+			-- Substitute harpooneed file.
+			vim.keymap.set("n", "<leader>hr", function()
+				require("harpoon"):list():replace_at(1)
+			end, { desc = "Harpoon: Substitute first harpooneed file" })
+			vim.keymap.set("n", "<leader>hrr", function()
+				require("harpoon"):list():replace_at(2)
+			end, { desc = "Harpoon: Substitute second harpooneed file" })
+			vim.keymap.set("n", "<leader>hrrr", function()
+				require("harpoon"):list():replace_at(3)
+			end, { desc = "Harpoon: Substitute third harpooneed file" })
+			vim.keymap.set("n", "<leader>hrrrr", function()
+				require("harpoon"):list():replace_at(4)
+			end, { desc = "Harpoon: Substitute fourth harpooneed file" })
 		end,
 	},
 

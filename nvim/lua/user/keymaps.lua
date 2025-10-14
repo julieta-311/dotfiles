@@ -7,7 +7,12 @@ local custom_functions = require("user.custom_functions")
 -- General Utility
 keymap("n", "<F4>", ":set hlsearch! hlsearch?<CR>", opts)
 keymap("n", "<F5>", [[:let _s=@/ | %s/\s\+$//e | let @/=_s | redraw! | echo "Removed trailing spaces"<CR>]], opts)
-keymap("n", "<leader>sc", custom_functions.snake_case_names, { noremap = true, silent = true, desc = "Convert value of field to snake_case" })
+keymap(
+	"n",
+	"<leader>sc",
+	custom_functions.snake_case_names,
+	{ noremap = true, silent = true, desc = "Convert value of field to snake_case" }
+)
 
 -- Window & Pane Navigation
 keymap("n", "<c-h>", "<C-w>h", opts)
@@ -21,16 +26,10 @@ keymap("n", "<S-Down>", "<C-w>j", { desc = "Navigate Down" })
 
 -- File Explorer
 keymap("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
-keymap("n", "<leader>f", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
-
--- Buffer Management (Bufferline)
-keymap("n", "<leader>bp", "<Cmd>BufferPrevious<CR>", { desc = "Previous buffer" })
-keymap("n", "<leader>bn", "<Cmd>BufferNext<CR>", { desc = "Next buffer" })
-keymap("n", "<leader>bc", "<Cmd>bdelete<CR>", { desc = "Close buffer" })
-keymap("n", "<leader>bo", "<Cmd>BufferPick<CR>", { desc = "Pick a buffer" })
+keymap("n", "<leader>ee", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
 
 -- Diagnostics
-keymap("n", "K", vim.diagnostic.open_float, { desc = "Open diagnostic float" }) -- Note: LSP hover may override this
+keymap("n", "<leader>kk", vim.diagnostic.open_float, { desc = "Open diagnostic float" }) -- Note: LSP hover may override this
 
 -- Copilot
 keymap("n", "<leader>cc", "<cmd>CopilotChatToggle<CR>", { desc = "Toggle Copilot Chat" })
