@@ -75,16 +75,16 @@ return {
 					group_empty = true,
 				},
 				filters = {
-					dotfiles = true,
+					dotfiles = false,
 				},
 				on_attach = function(bufnr)
 					local api = require("nvim-tree.api")
 					local opts = { noremap = true, silent = true, buffer = bufnr }
 
-					vim.keymap.set('n', '<CR>', api.node.open.edit, opts)
-					vim.keymap.set('n', 'o', api.node.open.edit, opts)
-					vim.keymap.set('n', 'h', api.node.open.horizontal, opts)
-					vim.keymap.set('n', 'v', api.node.open.vertical, opts)
+					vim.keymap.set("n", "<CR>", api.node.open.edit, opts)
+					vim.keymap.set("n", "o", api.node.open.edit, opts)
+					vim.keymap.set("n", "h", api.node.open.horizontal, opts)
+					vim.keymap.set("n", "v", api.node.open.vertical, opts)
 				end,
 				actions = {
 					open_file = {
