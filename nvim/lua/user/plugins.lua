@@ -1,5 +1,17 @@
 return {
 	{
+		"echasnovski/mini.comment",
+		version = false,
+		config = function()
+			require("mini.comment").setup({
+				mappings = {
+					comment = "<leader>/",
+					comment_line = "<leader>/",
+				},
+			})
+		end,
+	},
+	{
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -125,6 +137,38 @@ return {
 		config = function()
 			vim.cmd.colorscheme("tokyonight")
 		end,
+	},
+
+	{
+		"rmagatti/auto-session",
+		lazy = false,
+		keys = {
+			-- Will use Telescope if installed or a vim.ui.select picker otherwise
+			{ "<leader>sl", "<cmd>AutoSession search<CR>", desc = "Session search" },
+			{ "<leader>ss", "<cmd>AutoSession save<CR>", desc = "Save session" },
+			{ "<leader>sa", "<cmd>AutoSession toggle<CR>", desc = "Toggle autosave" },
+		},
+
+		---enables autocomplete for opts
+		---@module "auto-session"
+		---@type AutoSession.Config
+		opts = {
+			-- The following are already the default values, no need to provide them if these are already the settings you want.
+			session_lens = {
+				picker = nil, -- "telescope"|"snacks"|"fzf"|"select"|nil Pickers are detected automatically but you can also manually choose one. Falls back to vim.ui.select
+				mappings = {
+					-- Mode can be a string or a table, e.g. {"i", "n"} for both insert and normal mode
+					delete_session = { "i", "<C-d>" },
+					alternate_session = { "i", "<C-s>" },
+					copy_session = { "i", "<C-y>" },
+				},
+
+				picker_opts = { border = true },
+
+				-- Telescope only: If load_on_setup is false, make sure you use `:AutoSession search` to open the picker as it will initialize everything first
+				load_on_setup = true,
+			},
+		},
 	},
 
 	------------------------------------------------------------------
@@ -361,6 +405,23 @@ return {
 				lsp_fallback = true,
 			},
 
+			formatters = {
+				-- Create a custom prettier formatter for YAML that forces double quotes.
+				prettier_yaml = {
+					-- We inherit the base "prettier" formatter.
+					-- This is not a standard feature, but represents the idea.
+					-- The correct way is to define the command and args.
+					command = "prettier",
+					-- Prettier's CLI options documentation: https://prettier.io/docs/en/cli.html
+					-- We pass `--single-quote=false` to ensure it uses double quotes.
+					args = {
+						"--parser",
+						"yaml",
+						"--single-quote=false",
+					},
+				},
+			},
+
 			-- A table of formatters.
 			-- The key is the formatter name, and the value is the configuration.
 			formatters_by_ft = {
@@ -376,7 +437,7 @@ return {
 				less = { "prettier" },
 				html = { "prettier" },
 				json = { "prettier" },
-				yaml = { "prettier" },
+				yaml = { "prettier_yaml" },
 				markdown = { "prettier" },
 				graphql = { "prettier" },
 

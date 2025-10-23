@@ -14,6 +14,9 @@ keymap(
 	{ noremap = true, silent = true, desc = "Convert value of field to snake_case" }
 )
 
+keymap("n", "<leader>r", ":set relativenumber!<CR>", { desc = "Toggle relative number lines" })
+keymap("n", "<leader>vv", "<C-v>", { desc = "Visual Vertical Mode" })
+
 -- Window & Pane Navigation
 keymap("n", "<c-h>", "<C-w>h", opts)
 keymap("n", "<c-j>", "<C-w>j", opts)
