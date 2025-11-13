@@ -3,6 +3,7 @@ vim.g.mapleader = " "
 
 -- Basic editor settings.
 vim.opt.number = true -- Show line numbers.
+vim.opt.relativenumber = true -- Show relative line numbers.
 vim.opt.mouse = "a" -- Enable mouse support.
 vim.opt.clipboard = "unnamedplus" -- Use system clipboard.
 vim.opt.autochdir = true -- Automatically change directory to the current file's directory.
@@ -37,7 +38,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "json", "yaml", "yml", "lua", "html", "css", "sql" }, 
+	pattern = { "json", "yaml", "yml", "lua", "html", "css", "sql" },
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2

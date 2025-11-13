@@ -5,8 +5,11 @@ local opts = { noremap = true, silent = true }
 local custom_functions = require("user.custom_functions")
 
 -- General Utility
+keymap("i", "<leader>q", "<Esc>", { noremap = true, desc = "Exit insert mode" })
+keymap("v", "<leader>q", "<Esc>", { noremap = true, desc = "Exit insert mode" })
 keymap("n", "<F4>", ":set hlsearch! hlsearch?<CR>", opts)
 keymap("n", "<F5>", [[:let _s=@/ | %s/\s\+$//e | let @/=_s | redraw! | echo "Removed trailing spaces"<CR>]], opts)
+keymap("n", "<leader>n", "s<CR>", { noremap = true, desc = "Break line at cursor" })
 keymap(
 	"n",
 	"<leader>sc",
@@ -16,16 +19,13 @@ keymap(
 
 keymap("n", "<leader>r", ":set relativenumber!<CR>", { desc = "Toggle relative number lines" })
 keymap("n", "<leader>vv", "<C-v>", { desc = "Visual Vertical Mode" })
+keymap("n", "<leader>p", '"_dP', { desc = "Paste to replace without overwriting register" })
 
 -- Window & Pane Navigation
-keymap("n", "<c-h>", "<C-w>h", opts)
-keymap("n", "<c-j>", "<C-w>j", opts)
-keymap("n", "<c-k>", "<C-w>k", opts)
-keymap("n", "<c-l>", "<C-w>l", opts)
-keymap("n", "<S-Left>", "<C-w>h", { desc = "Navigate Left" })
-keymap("n", "<S-Right>", "<C-w>l", { desc = "Navigate Right" })
-keymap("n", "<S-Up>", "<C-w>k", { desc = "Navigate Up" })
-keymap("n", "<S-Down>", "<C-w>j", { desc = "Navigate Down" })
+keymap("n", "<leader>h", "<C-w>h", { desc = "Navigate Left" })
+keymap("n", "<leader>l", "<C-w>l", { desc = "Navigate Right" })
+keymap("n", "<leader>k", "<C-w>k", { desc = "Navigate Up" })
+keymap("n", "<leader>j", "<C-w>j", { desc = "Navigate Down" })
 
 -- File Explorer
 keymap("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })

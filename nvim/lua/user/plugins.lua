@@ -56,6 +56,13 @@ return {
 				desc = "Find files in core",
 			},
 			{
+				"<leader>gc",
+				function()
+					require("telescope.builtin").live_grep({ cwd = "/Users/julieta/ravelin/core" })
+				end,
+				desc = "Grep in core",
+			},
+			{
 				"<leader>fn",
 				function()
 					require("telescope.builtin").find_files({
@@ -528,6 +535,7 @@ return {
 					end, { expr = true, desc = "Previous Git hunk" })
 
 					-- Actions
+					map("n", "<leader>gs", vim.cmd.Git, { desc = "Git status" })
 					map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage Git hunk" })
 					map("n", "<leader>hr", gs.reset_hunk, { desc = "Reset Git hunk" })
 					map("v", "<leader>hs", function()
