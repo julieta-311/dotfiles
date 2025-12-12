@@ -26,6 +26,15 @@ return {
 				desc = "Find files",
 			},
 			{
+				"<leader>gp",
+				function()
+					require("telescope.builtin").live_grep({
+						cwd = vim.fn.expand("%:p:h:h"),
+					})
+				end,
+				desc = "Grep in parent directory",
+			},
+			{
 				"<leader>gg",
 				function()
 					require("telescope.builtin").live_grep()
@@ -61,6 +70,13 @@ return {
 					require("telescope.builtin").live_grep({ cwd = "/Users/julieta/ravelin/core" })
 				end,
 				desc = "Grep in core",
+			},
+			{
+				"<leader>gn",
+				function()
+					require("telescope.builtin").live_grep({ cwd = vim.fn.stdpath("config") })
+				end,
+				desc = "Grep in neovim config",
 			},
 			{
 				"<leader>fn",
@@ -102,15 +118,9 @@ return {
 
 					vim.keymap.set("n", "<CR>", api.node.open.edit, opts)
 					vim.keymap.set("n", "o", api.node.open.edit, opts)
-					vim.keymap.set("n", "h", api.node.open.horizontal, opts)
-					vim.keymap.set("n", "v", api.node.open.vertical, opts)
+					vim.keymap.set("n", "s", api.node.open.vertical, opts)
+					vim.keymap.set("n", "v", api.node.open.horizontal, opts)
 				end,
-				actions = {
-					open_file = {
-						quit_on_open = true,
-						resize_window = true,
-					},
-				},
 			})
 
 			-- Auto-open nvim-tree when Neovim starts with no files listed
@@ -358,24 +368,24 @@ return {
 				require("harpoon").ui:toggle_quick_menu(require("harpoon"):list())
 			end)
 
-			vim.keymap.set("n", "<leader>h1", function()
+			vim.keymap.set("n", "<leader>ha", function()
 				require("harpoon"):list():select(1)
 			end)
-			vim.keymap.set("n", "<leader>h2", function()
+			vim.keymap.set("n", "<leader>hs", function()
 				require("harpoon"):list():select(2)
 			end)
-			vim.keymap.set("n", "<leader>h3", function()
+			vim.keymap.set("n", "<leader>hd", function()
 				require("harpoon"):list():select(3)
 			end)
-			vim.keymap.set("n", "<leader>h4", function()
+			vim.keymap.set("n", "<leader>hf", function()
 				require("harpoon"):list():select(4)
 			end)
 
 			-- Toggle previous & next buffers stored within Harpoon list
-			vim.keymap.set("n", "<C-S-P>", function()
+			vim.keymap.set("n", "<C-S-H>", function()
 				require("harpoon"):list():prev()
 			end)
-			vim.keymap.set("n", "<C-S-N>", function()
+			vim.keymap.set("n", "<C-h>", function()
 				require("harpoon"):list():next()
 			end)
 
@@ -468,7 +478,7 @@ return {
 				[".md"] = false,
 			}
 			vim.g.copilot_no_tab_map = true
-			vim.keymap.set("i", "<leader>y", function()
+			vim.keymap.set("i", "<leader><Tab>", function()
 				vim.api.nvim_feedkeys(vim.fn["copilot#Accept"](), "i", true)
 			end, { noremap = true, silent = true, desc = "Copilot: Accept suggestion" })
 		end,
@@ -483,7 +493,7 @@ return {
 			debug = false,
 			prompts = {
 				Chat = {
-					model = "gemini-2.5-pro", -- Google Gemini model name. See :h CopilotChat-models for available models.
+					model = "gemini-3-pro", -- Google Gemini model name. See :h CopilotChat-models for available models.
 					prompt = "You are a helpful AI coding assistant who is an expert in Golang. Provide clear, concise and idiomatic ansers to the user's questions, focusing on code-related topics. If you don't know the answer, just say that you don't know. Do not make up an answer.",
 				},
 			},
