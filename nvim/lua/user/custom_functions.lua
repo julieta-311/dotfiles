@@ -6,59 +6,31 @@ function M.convert_field_to_snake_case(field_name)
 		return
 	end
 
-	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+	local modified_lines = {}
+	local pattern = field_name .. [[:\s*"]]
+	local changed = false
 
-	-- The field_name is inserted into the regex using string.format.
-	-- Pattern: finds the field name, followed by ": ", a double quote, then captures everything
-	-- that is NOT a quote inside the string, before the closing quote.
-	local cmd = string.format(
-		[[
-    :%%s/%s: "\zs[^"]*\ze"/\=tolower(substitute(submatch(0), '[ .]', '_', 'g'))/g
-  ]],
-		field_name
-	)
-
-	local ok, err = pcall(function()
-		vim.cmd(cmd)
-	end)
-
-	if not ok and not string.find(tostring(err), "E486") then
-		vim.notify("An unexpected error occurred: " .. tostring(err), vim.log.levels.ERROR)
-		return
+	for _, line in ipairs(lines) do
+		if line:find(pattern) then
+			local new_line = line:gsub(pattern .. '([^"]*)"', function(value)
+				local snake_case_value = value:gsub("%s+", "_"):gsub("[^%w_]", ""):lower()
+				changed = true
+				return field_name .. ': "' .. snake_case_value .. '"'
+			end)
+			table.insert(modified_lines, new_line)
+		else
+			table.insert(modified_lines, line)
+		end
 	end
 
-	vim.api.nvim_win_set_cursor(0, cursor_pos)
-	vim.notify("Finished converting spaces to snake_case for field: " .. field_name, vim.log.levels.INFO)
-end
-
-function M.unbreak_line(separator)
-	local sep = separator or " " -- Use space if no separator is provided
-	local line_num = vim.api.nvim_win_get_cursor(0)[1] - 1 -- 0-indexed line number
-
-	-- Fetch the current line and the next line
-	local lines = vim.api.nvim_buf_get_lines(0, line_num, line_num + 2, true)
-
-	if #lines < 2 then
-		vim.notify("Cannot unbreak line: end of buffer.", vim.log.levels.INFO)
-		return
+	if changed then
+		vim.api.nvim_buf_set_lines(0, 0, -1, false, modified_lines)
+		vim.notify("Converted " .. field_name .. " values to snake_case.", vim.log.levels.INFO)
+	else
+		vim.notify("No " .. field_name .. " fields found to convert.", vim.log.levels.INFO)
 	end
-
-	local current_line = lines[1]
-	local next_line = lines[2]
-
-	-- 1. Trim leading whitespace from the next line
-	local next_line_trimmed = next_line:match("^%s*(.*)")
-
-	-- 2. Concatenate: current line + separator + trimmed next line
-	local new_line = current_line .. sep .. next_line_trimmed
-
-	-- 3. Replace the current line with the combined line
-	vim.api.nvim_buf_set_lines(0, line_num, line_num + 1, false, { new_line })
-
-	-- 4. Delete the original next line
-	vim.api.nvim_buf_set_lines(0, line_num + 1, line_num + 2, false, {})
-
-	vim.notify("Lines joined with separator: '" .. sep .. "'", vim.log.levels.INFO)
 end
 
 return M
+
