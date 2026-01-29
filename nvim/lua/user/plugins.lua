@@ -150,16 +150,6 @@ return {
 	{ "christoomey/vim-tmux-navigator" },
 
 	{
-		"fatih/vim-go",
-		dependencies = { "lewis6991/gitsigns.nvim" }, -- Example: if it has dependencies
-		init = function()
-			vim.g.go_def_mapping_enabled = 0 -- Let lsp handle this.
-			vim.g.go_lint_tool = "golangci-lint"
-			vim.g.go_lint_autosave = 1
-		end,
-	},
-
-	{
 		"folke/tokyonight.nvim",
 		lazy = false, -- make sure we load this during startup
 		priority = 1000, -- make sure to load this before all the other start plugins
@@ -355,7 +345,7 @@ return {
 					separator_style = "thin",
 					-- Use `show_buffer_close_icons` and `show_close_icon` to configure close icons
 					show_buffer_close_icons = true,
-					show_close_icon = "always",
+					show_close_icon = true,
 					-- Set the indicator style
 					indicator = {
 						style = "icon",
@@ -378,51 +368,51 @@ return {
 			})
 
 			vim.keymap.set("n", "<leader>ha", function()
-				require("harpoon.mark").add_file()
+				require("harpoon"):list():append()
 				vim.notify("Harpooned " .. vim.fn.expand("%:t"), vim.log.levels.INFO, { title = "Harpoon" })
 			end, { desc = "Harpoon: Add file to list" })
 
 			vim.keymap.set("n", "<leader>hh", function()
-				require("harpoon.ui").toggle_quick_menu()
+				require("harpoon").ui:toggle_quick_menu(require("harpoon"):list())
 			end, { desc = "Harpoon: Toggle quick menu" })
 
 			vim.keymap.set("n", "<leader>h1", function()
-				require("harpoon.ui").nav_file(1)
+				require("harpoon"):list():select(1)
 			end, { desc = "Harpoon: Go to file 1" })
 
 			vim.keymap.set("n", "<leader>h2", function()
-				require("harpoon.ui").nav_file(2)
+				require("harpoon"):list():select(2)
 			end, { desc = "Harpoon: Go to file 2" })
 
 			vim.keymap.set("n", "<leader>h3", function()
-				require("harpoon.ui").nav_file(3)
+				require("harpoon"):list():select(3)
 			end, { desc = "Harpoon: Go to file 3" })
 
 			vim.keymap.set("n", "<leader>h4", function()
-				require("harpoon.ui").nav_file(4)
+				require("harpoon"):list():select(4)
 			end, { desc = "Harpoon: Go to file 4" })
 
 			-- Toggle previous & next buffers stored within Harpoon list
 			vim.keymap.set("n", "<C-S-H>", function()
-				require("harpoon.ui").nav_prev()
+				require("harpoon"):list():prev()
 			end, { desc = "Harpoon: Go to previous file" })
 
 			vim.keymap.set("n", "<C-h>", function()
-				require("harpoon.ui").nav_next()
+				require("harpoon"):list():next()
 			end, { desc = "Harpoon: Go to next file" })
 
 			-- Substitute harpooneed file.
 			vim.keymap.set("n", "<leader>hr", function()
-				require("harpoon.mark").set_current_at(1)
+				require("harpoon"):list():replace_at(1)
 			end, { desc = "Harpoon: Substitute first harpooneed file" })
 			vim.keymap.set("n", "<leader>hrr", function()
-				require("harpoon.mark").set_current_at(2)
+				require("harpoon"):list():replace_at(2)
 			end, { desc = "Harpoon: Substitute second harpooneed file" })
 			vim.keymap.set("n", "<leader>hrrr", function()
-				require("harpoon.mark").set_current_at(3)
+				require("harpoon"):list():replace_at(3)
 			end, { desc = "Harpoon: Substitute third harpooneed file" })
 			vim.keymap.set("n", "<leader>hrrrr", function()
-				require("harpoon.mark").set_current_at(4)
+				require("harpoon"):list():replace_at(4)
 			end, { desc = "Harpoon: Substitute fourth harpooneed file" })
 		end,
 	},
@@ -488,9 +478,9 @@ return {
 	{
 		"github/copilot.vim",
 		config = function()
-			-- Optional: Disable Copilot for certain filetypes
+			-- Optional: Disable Copilot for certain filetypes.
 			vim.g.copilot_filetypes = {
-				["*"] = true, -- Enable for all by default
+				["*"] = true, -- Enable for all by default.
 				["help"] = false,
 				["gitcommit"] = false,
 				["gitrebase"] = false,
@@ -529,6 +519,9 @@ return {
 		"lewis6991/gitsigns.nvim",
 		config = function()
 			require("gitsigns").setup({
+				attach_to_untracked = true,
+				current_line_blame = true,
+
 				signs = {
 					add = { text = "│" },
 					change = { text = "│" },
@@ -538,6 +531,12 @@ return {
 					untracked = { text = "┆" },
 				},
 				on_attach = function(bufnr)
+					-- Disable for large files (over 200KB).
+					local size = vim.fn.getfsize(vim.api.nvim_buf_get_name(bufnr))
+					if size > 200 * 1024 then
+						return false
+					end
+					--- Define keymaps.
 					local gs = package.loaded.gitsigns
 					local function map(mode, l, r, opts)
 						opts = opts or {}
@@ -545,7 +544,7 @@ return {
 						vim.keymap.set(mode, l, r, opts)
 					end
 
-					-- Navigation
+					-- Navigation.
 					map("n", "]c", function()
 						if vim.wo.diff then
 							return "]c"
@@ -566,7 +565,8 @@ return {
 						return "<Ignore>"
 					end, { expr = true, desc = "Previous Git hunk" })
 
-					-- Actions
+					-- Actions.
+					map("n", "<leader>gh", gs.preview_hunk, { desc = "Preview Git hunk" })
 					map("n", "<leader>gs", vim.cmd.Git, { desc = "Git status" })
 					map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage Git hunk" })
 					map("n", "<leader>hr", gs.reset_hunk, { desc = "Reset Git hunk" })
@@ -584,4 +584,3 @@ return {
 		end,
 	},
 }
-

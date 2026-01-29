@@ -1,30 +1,6 @@
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- Require plugin modules
-local custom_functions = require("user.custom_functions")
-
--- Helper function to call the converter with a specific field name
-local function convert_field(field_name)
-	return function()
-		require("user.custom_functions").convert_field_to_snake_case(field_name)
-	end
-end
-
-keymap(
-	"n",
-	"<leader>sn",
-	convert_field("name"),
-	{ noremap = true, silent = true, desc = "Convert 'name' value to snake_case" }
-)
-
-keymap(
-	"n",
-	"<leader>sd",
-	convert_field("desc"),
-	{ noremap = true, silent = true, desc = "Convert 'desc' value to snake_case" }
-)
-
 -- General Utility
 keymap("i", "<leader>q", "<Esc>", { noremap = true, desc = "Exit insert mode" })
 keymap("v", "<leader>q", "<Esc>", { noremap = true, desc = "Exit insert mode" })
