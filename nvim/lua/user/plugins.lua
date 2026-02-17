@@ -18,8 +18,27 @@ return {
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
 		},
 		config = function()
-			-- Load Telescope extensions
-			require("telescope").load_extension("harpoon")
+			local telescope = require("telescope")
+			local actions = require("telescope.actions")
+
+			telescope.setup({
+				defaults = {
+					mappings = {
+						i = {
+							["<C-s>"] = actions.select_vertical, -- Map Ctrl-s for vertical split
+							["<C-h>"] = actions.select_horizontal, -- Map Ctrl-h for horizontal split
+							-- <C-v> is left unmapped for pasting
+						},
+						n = {
+							["<C-s>"] = actions.select_vertical,
+							["<C-h>"] = actions.select_horizontal,
+						},
+					},
+				},
+			})
+
+			-- Load Telescope extensions (keep this if you use harpoon with Telescope)
+			telescope.load_extension("harpoon")
 		end,
 		keys = {
 			{
@@ -521,7 +540,8 @@ return {
 			require("gitsigns").setup({
 				attach_to_untracked = true,
 				current_line_blame = true,
-
+				update_debounce = 300, -- default is 100.
+				max_file_length = 40000, -- Disable for files over 40,000 lines.
 				signs = {
 					add = { text = "│" },
 					change = { text = "│" },
