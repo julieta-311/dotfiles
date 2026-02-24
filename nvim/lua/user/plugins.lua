@@ -218,7 +218,7 @@ return {
 		config = function()
 			require("nvim-treesitter.configs").setup({
 				-- A list of parser names, or "all"
-				ensure_installed = { "go", "lua", "vim", "vimdoc" },
+				ensure_installed = { "go", "lua", "vim", "vimdoc", "yaml" },
 
 				-- Install parsers synchronously (only applied to `ensure_installed`)
 				sync_install = false,
@@ -290,13 +290,48 @@ return {
 					vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 					vim.keymap.set("n", "<leader>lr", vim.lsp.buf.rename, opts)
 					vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, opts)
-					vim.keymap.set("n", "<leader>lf", function()
-						vim.lsp.buf.format({ async = true })
-					end, opts)
 				end,
 			})
 
+			vim.lsp.config("gopls", {
+				settings = {
+					gopls = {
+						analyses = {
+							unusedparams = true,
+							shadow = true,
+							nilness = true,
+							revive = true,
+							unusedresult = true,
+							httpresponse = true,
+							ST1000 = false,
+							QF1008 = false,
+							ST1003 = false,
+						},
+						staticcheck = true,
+						gofumpt = true,
+					},
+				},
+			})
 			vim.lsp.enable("gopls")
+
+			-- Autocmd for Go imports and formatting on save
+			vim.api.nvim_create_autocmd("BufWritePre", {
+				pattern = "*.go",
+				callback = function()
+					local params = vim.lsp.util.make_range_params()
+					params.context = { only = { "source.organizeImports" } }
+					local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
+					for cid, res in pairs(result or {}) do
+						for _, r in pairs(res.result or {}) do
+							if r.edit then
+								local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
+								vim.lsp.util.apply_workspace_edit(r.edit, enc)
+							end
+						end
+					end
+					vim.lsp.buf.format({ async = false })
+				end,
+			})
 			vim.lsp.enable("pyright")
 			vim.lsp.enable("ts_ls")
 
@@ -346,6 +381,10 @@ return {
 			{ "<leader>bp", "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" },
 			{ "<leader>bn", "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" },
 			{ "<leader>bc", "<Cmd>bdelete<CR>", desc = "Close buffer" },
+			{ "<leader>bq", "<Cmd>BufferLinePickClose<CR>", desc = "Pick and close a buffer" },
+			{ "<leader>bo", "<Cmd>BufferLineCloseOthers<CR>", desc = "Close all other buffers" },
+			{ "<leader>br", "<Cmd>BufferLineCloseRight<CR>", desc = "Close buffers to the right" },
+			{ "<leader>bl", "<Cmd>BufferLineCloseLeft<CR>", desc = "Close buffers to the left" },
 		},
 		config = function()
 			require("bufferline").setup({
@@ -456,12 +495,7 @@ return {
 			formatters = {
 				-- Create a custom prettier formatter for YAML that forces double quotes.
 				prettier_yaml = {
-					-- We inherit the base "prettier" formatter.
-					-- This is not a standard feature, but represents the idea.
-					-- The correct way is to define the command and args.
 					command = "prettier",
-					-- Prettier's CLI options documentation: https://prettier.io/docs/en/cli.html
-					-- We pass `--single-quote=false` to ensure it uses double quotes.
 					args = {
 						"--parser",
 						"yaml",
@@ -470,8 +504,6 @@ return {
 				},
 			},
 
-			-- A table of formatters.
-			-- The key is the formatter name, and the value is the configuration.
 			formatters_by_ft = {
 				lua = { "stylua" },
 
@@ -527,6 +559,30 @@ return {
 					model = "gemini-3-pro", -- Google Gemini model name. See :h CopilotChat-models for available models.
 					prompt = "You are a helpful AI coding assistant who is an expert in Golang. Provide clear, concise and idiomatic ansers to the user's questions, focusing on code-related topics. If you don't know the answer, just say that you don't know. Do not make up an answer.",
 				},
+			},
+		},
+		contexts = {
+			file = {
+				-- Override the default input with a custom Telescope picker
+				input = function(callback)
+					local telescope = require("telescope.builtin")
+					local actions = require("telescope.actions")
+					local action_state = require("telescope.actions.state")
+					telescope.find_files({
+						prompt_title = "Copilot Context: Select File",
+						attach_mappings = function(prompt_bufnr)
+							actions.select_default:replace(function()
+								actions.close(prompt_bufnr)
+								local selection = action_state.get_selected_entry()
+								-- Pass the selected file back to CopilotChat
+								if selection then
+									callback(selection[1])
+								end
+							end)
+							return true
+						end,
+					})
+				end,
 			},
 		},
 	},
