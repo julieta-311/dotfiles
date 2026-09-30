@@ -2,8 +2,8 @@ local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
 -- General Utility
-keymap("i", "<leader>q", "<Esc>", { noremap = true, desc = "Exit insert mode" })
-keymap("v", "<leader>q", "<Esc>", { noremap = true, desc = "Exit insert mode" })
+keymap("i", "<leader>qq", "<Esc>", { noremap = true, desc = "Exit insert mode" })
+keymap("v", "<leader>qq", "<Esc>", { noremap = true, desc = "Exit insert mode" })
 keymap("n", "<F4>", ":set hlsearch! hlsearch?<CR>", opts)
 keymap("n", "<F5>", [[:let _s=@/ | %s/\s\+$//e | let @/=_s | redraw! | echo "Removed trailing spaces"<CR>]], opts)
 keymap("n", "<leader>n", "s<CR><Esc>", { noremap = true, desc = "Break line at cursor" })
@@ -60,3 +60,25 @@ keymap("v", "<leader>co", "<cmd>CopilotChatOptimize<CR>", { desc = "Optimise Cod
 keymap("v", "<leader>ct", "<cmd>CopilotChatTests<CR>", { desc = "Generate Tests" })
 keymap("n", "<leader>cm", "<cmd>CopilotChatCommit<CR>", { desc = "Generate Commit Message" })
 keymap("v", "<leader>cs", "<cmd>CopilotChatCommit<CR>", { desc = "Generate Commit for Selection" })
+
+-- Formatting
+keymap({ "n", "v" }, "<leader>lf", function()
+	require("conform").format({ async = true, lsp_fallback = true })
+end, { desc = "Format buffer" })
+
+-- Go-specific utilities & table-driven test string formatters.
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "go",
+	callback = function()
+		local utils = require("user.custom")
+
+		-- Register command: Invoked with :SnakeCase
+		vim.api.nvim_create_user_command("SnakeCase", utils.snake_case_name_fields, {})
+
+		-- Register buffer-local normal map to prevent binding namespace collisions
+		vim.keymap.set("n", "<leader>cx", utils.snake_case_name_fields, {
+			buffer = true,
+			desc = "Snake case Go table test names",
+		})
+	end,
+})
