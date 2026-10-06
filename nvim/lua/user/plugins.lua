@@ -533,7 +533,7 @@ return {
 
 			formatters = {
 				prettier = {
-					args = {
+					prepend_args = {
 						"--single-quote=false",
 						"--print-width=120",
 					},
@@ -592,7 +592,7 @@ return {
 				scss = { "prettier" },
 				less = { "prettier" },
 				html = { "prettier" },
-				json = { "prettier" },
+				json = { "jq" },
 				yaml = { "prettier_yaml" },
 				markdown = { "prettier" },
 				graphql = { "prettier" },
@@ -744,35 +744,33 @@ return {
 			local lint = require("lint")
 
 			-- Override sqlfluff linter to set working directory to dbt project
-			lint.linters.sqlfluff.cmd = vim.fn.expand("~/.venvs/sqlfluff/bin/sqlfluff")
-			lint.linters.sqlfluff.stdin = false
-			lint.linters.sqlfluff.args = { "lint", "--format=json", "--dialect=bigquery" }
+			lint.linters.sqlfluff = vim.tbl_deep_extend("force", lint.linters.sqlfluff or {}, {
+				cmd = vim.fn.expand("~/.venvs/sqlfluff/bin/sqlfluff"),
+				stdin = false,
+				args = { "lint", "--format=json", "--dialect=bigquery" },
+				cwd = function()
+					local file_path = vim.api.nvim_buf_get_name(0)
+					local file_dir = vim.fn.fnamemodify(file_path, ":h")
+					local current_dir = file_dir
 
-			-- Wrap linter to change cwd to dbt project directory
-			local sqlfluff_linter = lint.linters.sqlfluff
-			lint.linters.sqlfluff = function()
-				local config = sqlfluff_linter
-				local file_path = vim.api.nvim_buf_get_name(0)
-				local file_dir = vim.fn.fnamemodify(file_path, ":h")
-				local current_dir = file_dir
-
-				-- Find dbt_project.yml by walking up
-				while current_dir ~= "/" do
-					local dbt_project = current_dir .. "/dbt_project.yml"
-					if vim.fn.filereadable(dbt_project) == 1 then
-						config.cwd = current_dir
-						break
+					-- Find dbt_project.yml by walking up
+					while current_dir ~= "/" do
+						local dbt_project = current_dir .. "/dbt_project.yml"
+						if vim.fn.filereadable(dbt_project) == 1 then
+							return current_dir
+						end
+						current_dir = vim.fn.fnamemodify(current_dir, ":h")
 					end
-					current_dir = vim.fn.fnamemodify(current_dir, ":h")
-				end
 
-				return config
-			end
+					return file_dir
+				end,
+			})
 
 			lint.linters_by_ft = {
 				sql = { "sqlfluff" },
 				yaml = { "yamllint" },
 				python = { "ruff" },
+				json = { "jsonlint" },
 			}
 
 			-- Auto-lint on buffer open and while editing (not just on save).
