@@ -606,62 +606,17 @@ return {
 	{
 		"github/copilot.vim",
 		config = function()
-			-- Optional: Disable Copilot for certain filetypes.
 			vim.g.copilot_filetypes = {
-				["*"] = true, -- Enable for all by default.
+				["*"] = true,
 				["help"] = false,
 				["gitcommit"] = false,
 				["gitrebase"] = false,
-				["hgcommit"] = false,
-				["svn"] = false,
-				["cvs"] = false,
-				[".md"] = false,
 			}
 			vim.g.copilot_no_tab_map = true
 			vim.keymap.set("i", "<leader><Tab>", function()
 				vim.api.nvim_feedkeys(vim.fn["copilot#Accept"](), "i", true)
 			end, { noremap = true, silent = true, desc = "Copilot: Accept suggestion" })
 		end,
-	},
-	{
-		"CopilotC-Nvim/CopilotChat.nvim",
-		dependencies = {
-			{ "github/copilot.vim" },
-			{ "nvim-lua/plenary.nvim" }, -- for curl, log and asyc functions.
-		},
-		opts = {
-			debug = false,
-			prompts = {
-				Chat = {
-					model = "gemini-3-pro", -- Google Gemini model name. See :h CopilotChat-models for available models.
-					prompt = "You are a helpful AI coding assistant who is an expert in Golang. Provide clear, concise and idiomatic ansers to the user's questions, focusing on code-related topics. If you don't know the answer, just say that you don't know. Do not make up an answer.",
-				},
-			},
-		},
-		contexts = {
-			file = {
-				-- Override the default input with a custom Telescope picker
-				input = function(callback)
-					local telescope = require("telescope.builtin")
-					local actions = require("telescope.actions")
-					local action_state = require("telescope.actions.state")
-					telescope.find_files({
-						prompt_title = "Copilot Context: Select File",
-						attach_mappings = function(prompt_bufnr)
-							actions.select_default:replace(function()
-								actions.close(prompt_bufnr)
-								local selection = action_state.get_selected_entry()
-								-- Pass the selected file back to CopilotChat
-								if selection then
-									callback(selection[1])
-								end
-							end)
-							return true
-						end,
-					})
-				end,
-			},
-		},
 	},
 
 	-- Git integration.
