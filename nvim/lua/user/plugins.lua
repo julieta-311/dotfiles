@@ -222,21 +222,42 @@ return {
 	------------------------------------------------------------------
 	{
 		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
+		lazy = false,
 		build = ":TSUpdate", -- Automatically installs and updates parsers
 		config = function()
-			require("nvim-treesitter.configs").setup({
-				-- A list of parser names, or "all"
-				ensure_installed = { "go", "lua", "python", "vim", "vimdoc", "yaml" },
+			local treesitter = require("nvim-treesitter")
+			treesitter.setup({})
+			treesitter.install({ "go", "lua", "markdown", "markdown_inline", "python", "vim", "vimdoc", "yaml" })
 
-				-- Install parsers synchronously (only applied to `ensure_installed`)
-				sync_install = false,
+			local available = treesitter.get_available()
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true }),
+				callback = function(event)
+					local lang = vim.treesitter.language.get_lang(event.match)
+					if not lang or not vim.tbl_contains(available, lang) then
+						return
+					end
 
-				-- Automatically install missing parsers when entering buffer
-				auto_install = true,
+					local function start()
+						if vim.api.nvim_buf_is_valid(event.buf) and vim.bo[event.buf].filetype == event.match then
+							vim.treesitter.start(event.buf, lang)
+						end
+					end
 
-				highlight = {
-					enable = true, -- Enable syntax highlighting
-				},
+					if vim.tbl_contains(treesitter.get_installed("parsers"), lang) then
+						start()
+					else
+						-- Start highlighting once an automatically installed parser is ready.
+						treesitter.install({ lang }):await(vim.schedule_wrap(function(err)
+							if err then
+								vim.notify(tostring(err), vim.log.levels.ERROR)
+							elseif vim.tbl_contains(treesitter.get_installed("parsers"), lang) then
+								start()
+							end
+						end))
+					end
+				end,
 			})
 		end,
 	},
@@ -390,6 +411,15 @@ return {
 				},
 			})
 			vim.lsp.enable("lua_ls")
+
+			vim.lsp.config("jsonls", {
+				settings = {
+					json = {
+						validate = { enable = true },
+					},
+				},
+			})
+			vim.lsp.enable("jsonls")
 		end,
 	},
 
@@ -533,7 +563,7 @@ return {
 
 			formatters = {
 				prettier = {
-					prepend_args = {
+					args = {
 						"--single-quote=false",
 						"--print-width=120",
 					},
@@ -607,7 +637,7 @@ return {
 		"github/copilot.vim",
 		config = function()
 			vim.g.copilot_filetypes = {
-				["*"] = true,
+				["*"] = true, -- Enable for all by default.
 				["help"] = false,
 				["gitcommit"] = false,
 				["gitrebase"] = false,
@@ -720,12 +750,19 @@ return {
 					return file_dir
 				end,
 			})
+			lint.linters.sqlfluff.cmd = vim.fn.expand("~/.venvs/sqlfluff/bin/sqlfluff")
+			lint.linters.sqlfluff.stdin = false
+			lint.linters.sqlfluff.args = { "lint", "--format=json", "--dialect=bigquery" }
 
 			lint.linters_by_ft = {
 				sql = { "sqlfluff" },
 				yaml = { "yamllint" },
 				python = { "ruff" },
 				json = { "jsonlint" },
+				javascript = { "eslint" },
+				typescript = { "eslint" },
+				javascriptreact = { "eslint" },
+				typescriptreact = { "eslint" },
 			}
 
 			-- Auto-lint on buffer open and while editing (not just on save).
