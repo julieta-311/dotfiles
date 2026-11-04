@@ -12,6 +12,22 @@ return {
 		end,
 	},
 	{
+		"nvim-mini/mini.surround",
+		version = false,
+		config = function()
+			require("mini.surround").setup({
+				mappings = {
+					add = "sa", -- Add surrounding in Normal and Visual modes
+					delete = "sd", -- Delete surrounding
+					find = "sf", -- Find surrounding (to the right)
+					find_left = "sF", -- Find surrounding (to the left)
+					highlight = "sh", -- Highlight surrounding
+					replace = "sr",
+				},
+			})
+		end,
+	},
+	{
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -397,12 +413,20 @@ return {
 			vim.lsp.enable("ty")
 			vim.lsp.enable("ts_ls")
 
+			local lua_library = vim.api.nvim_get_runtime_file("", true)
+			for _, plugin in pairs(require("lazy.core.config").plugins) do
+				local lua_dir = plugin.dir .. "/lua"
+				if vim.fn.isdirectory(lua_dir) == 1 then
+					table.insert(lua_library, lua_dir)
+				end
+			end
+
 			vim.lsp.config("lua_ls", {
 				settings = {
 					Lua = {
 						workspace = {
 							checkThirdParty = false,
-							library = vim.api.nvim_get_runtime_file("", true),
+							library = lua_library,
 						},
 						telemetry = {
 							enable = false,
